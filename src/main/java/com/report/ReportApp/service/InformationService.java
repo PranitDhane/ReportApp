@@ -3,9 +3,11 @@ package com.report.ReportApp.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.report.ReportApp.Utils.GenerateCsvUtils;
 import com.report.ReportApp.entity.Information;
 import com.report.ReportApp.repository.InformationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.reactive.context.GenericReactiveWebApplicationContext;
 import org.springframework.stereotype.Service;
 import com.report.ReportApp.Constants;
 
@@ -15,10 +17,12 @@ import java.util.List;
 public class InformationService {
     private InformationRepository informationRepository;
     private ReportService reportService;
+    private GenerateCsvUtils generateCsvUtils;
     @Autowired
-    public InformationService(InformationRepository informationRepository, ReportService reportService) {
+    public InformationService(InformationRepository informationRepository, ReportService reportService, GenerateCsvUtils generateCsvUtils) {
         this.informationRepository = informationRepository;
         this.reportService = reportService;
+        this.generateCsvUtils=generateCsvUtils;
     }
 
     public String insertBulkInformationData(ArrayNode inputNode){
@@ -45,9 +49,10 @@ public class InformationService {
         if(response.get(Constants.Status_CODE).asInt()!=200){
             return response;
         }
-        String fileLocation = response.get(Constants.storageLocation).toString();
+        String fileLocation = response.get(Constants.storageLocation).asText();
         String reportName = response.get(Constants.infoTitle).toString();
         List<Information> getInfoFromTitle = informationRepository.getInfoFromTitle(reportName);
+        generateCsvUtils.createMainReportToCsv(getInfoFromTitle,fileLocation);
         response.put(Constants.Status_CODE , Constants.ok);
         response.put("data",getInfoFromTitle.toString());
         return response;
