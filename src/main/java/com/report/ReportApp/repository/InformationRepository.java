@@ -11,4 +11,5 @@ public interface InformationRepository extends JpaRepository<Information,Long> {
 
     @Query("Select i from Information i where i.infoTitle = :infoTitle")
     List<Information>getInfoFromTitle(@Param("infoTitle")String infoTitle);
+
 }

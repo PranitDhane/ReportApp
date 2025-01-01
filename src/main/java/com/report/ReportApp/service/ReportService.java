@@ -49,9 +49,11 @@ queryForSheet : "Select * from information where infoTitle = "Gardens";
             for (JsonNode sheet : sheets) {
                 String sheetLocation = sheet.get("sheetLocation").toString();
                 String queryForSheet = sheet.get("queryForSheet").toString();
+                String sheetName = sheet.get("sheetName").toString();
                 Sheet sheetInfo = new Sheet();
                 sheetInfo.setSheetLocation(sheetLocation);
                 sheetInfo.setQueryForSheet(queryForSheet);
+                sheetInfo.setSheetName(sheetName);
                 sheetInfo.setReportDetails(savedReportDetails);
                 sheetRepository.save(sheetInfo);
             }

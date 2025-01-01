@@ -35,13 +35,12 @@ public class HomeController {
 
     @PostMapping("/addReportSheetData")
     public String addReportSheetData(@RequestBody JsonNode inputNode){
-
-    return reportService.insertReportSheetDetails(inputNode);
+        return reportService.insertReportSheetDetails(inputNode);
     }
 
     @PostMapping("/bulkUploadInformationData")
     public String bulkUploadInformationData(@RequestBody ArrayNode inputNode){
-       return informationService.insertBulkInformationData( inputNode);
+        return informationService.insertBulkInformationData( inputNode);
     }
 
 }
