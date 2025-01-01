@@ -23,6 +23,9 @@ public class Sheet {
     @Column(name = "query_for_sheet", nullable = false)
     private String queryForSheet;
 
+    @Column(name = "sheet_name", nullable = false)
+    private String sheetName;
+
     @ManyToOne
     @JoinColumn(name = "report_id", nullable = false)
     private ReportDetails reportDetails;
