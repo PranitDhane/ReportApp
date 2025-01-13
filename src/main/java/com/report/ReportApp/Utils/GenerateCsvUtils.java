@@ -1,7 +1,12 @@
 package com.report.ReportApp.Utils;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.opencsv.CSVWriter;
 import com.report.ReportApp.entity.Information;
+import com.report.ReportApp.service.KafkaService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -12,7 +17,11 @@ import java.util.concurrent.CompletableFuture;
 @Component
 public class GenerateCsvUtils {
 
-    public CompletableFuture<Void>createMainReportToCsv(List<Information> getInfoFromTitle, String storageLocation){
+    @Autowired
+    private KafkaService kafkaService;
+    private ObjectMapper mapper = new ObjectMapper();
+
+    public CompletableFuture<Void>createMainReportToCsv(List<Information> getInfoFromTitle, String storageLocation, String emailId){
         return CompletableFuture.runAsync(()->{
            try {
                String finalLocation = storageLocation.replace("{ReportName}.csv","testReport.csv");
@@ -35,8 +44,12 @@ public class GenerateCsvUtils {
                       String [] content = {info.getCity(),info.getCountry(),info.getDesc(),info.getInfoName(),info.getRating()+"",info.getState()};
                         writer.writeNext(content);
                    }
+               ObjectNode objectNode = mapper.createObjectNode();
+                   objectNode.put("emailId",emailId);
+                   objectNode.put("storeLocation",finalLocation);
                 writer.close();
 
+               kafkaService.raiseSendEmailEvent(objectNode);
 
            }catch (IOException e){
                e.printStackTrace();

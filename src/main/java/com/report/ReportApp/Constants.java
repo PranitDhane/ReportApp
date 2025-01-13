@@ -8,5 +8,6 @@ public class Constants {
     final public static  String storageLocation ="storageLocation";
     final public static String reportId ="reportId";
     final public static String infoTitle = "infoTitle";
+    final public static String raiseEmailEvent = "raiseEmailEvent";
 
 }

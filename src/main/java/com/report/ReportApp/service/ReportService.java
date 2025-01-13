@@ -1,6 +1,7 @@
 package com.report.ReportApp.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.report.ReportApp.entity.Information;
@@ -25,7 +26,10 @@ public class ReportService {
     @Autowired
     private  SheetRepository sheetRepository;
 
-/*
+    final ObjectMapper mapper = new ObjectMapper();
+
+
+    /*
 {
 "reportName":GardenReport,
 "sheets":[
@@ -39,7 +43,7 @@ queryForSheet : "Select * from information where infoTitle = "Gardens";
 */
     public String insertReportSheetDetails(JsonNode node){
         try{
-        String reportName = node.get("reportName").toString();
+        String reportName = node.get("reportName").asText();
         ArrayNode sheets =  (ArrayNode) node.get("sheets");
         ReportDetails reportDetails = new ReportDetails();
         reportDetails.setReportName(reportName);
@@ -47,11 +51,13 @@ queryForSheet : "Select * from information where infoTitle = "Gardens";
             ReportDetails savedReportDetails = reportDetailsRepository.save(reportDetails);
 
             for (JsonNode sheet : sheets) {
-                String sheetLocation = sheet.get("sheetLocation").toString();
-                String queryForSheet = sheet.get("queryForSheet").toString();
+                String sheetLocation = sheet.get("sheetLocation").asText();
+                String queryForSheet = sheet.get("queryForSheet").asText();
+                String sheetName = sheet.get("sheetName").asText();
                 Sheet sheetInfo = new Sheet();
                 sheetInfo.setSheetLocation(sheetLocation);
                 sheetInfo.setQueryForSheet(queryForSheet);
+                sheetInfo.setSheetName(sheetName);
                 sheetInfo.setReportDetails(savedReportDetails);
                 sheetRepository.save(sheetInfo);
             }
@@ -81,6 +87,19 @@ queryForSheet : "Select * from information where infoTitle = "Gardens";
 
     response.put(Constants.Status_CODE,Constants.ok);
     return response;
+    }
+
+    public JsonNode getReportTitle(ObjectNode response){
+       List<ReportDetails>reportDetails = reportDetailsRepository.findAll();
+       ArrayNode finalArrayList = mapper.createArrayNode();
+        for (ReportDetails reportDetail: reportDetails) {
+            ObjectNode node = mapper.createObjectNode();
+            node.put( "reportId" ,reportDetail.getReportId());
+            node.put("reportName",reportDetail.getReportName());
+            finalArrayList.add(node);
+        }
+        response.put("data",finalArrayList);
+        return response;
     }
 
 

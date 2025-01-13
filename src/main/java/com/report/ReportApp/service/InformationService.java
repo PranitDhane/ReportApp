@@ -29,13 +29,13 @@ public class InformationService {
         try{
             for (JsonNode node : inputNode) {
                 Information information = new Information();
-                information.setInfoTitle(node.get("infoTitle").toString());
-                information.setInfoName(node.get("infoName").toString());
-                information.setDesc(node.get("description").toString());
-                information.setRating(Integer.parseInt(node.get("rating").toString()));
-                information.setCountry(node.get("country").toString());
-                information.setState(node.get("state").toString());
-                information.setCity(node.get("city").toString());
+                information.setInfoTitle(node.get("infoTitle").asText());
+                information.setInfoName(node.get("infoName").asText());
+                information.setDesc(node.get("description").asText());
+                information.setRating(Integer.parseInt(node.get("rating").asText()));
+                information.setCountry(node.get("country").asText());
+                information.setState(node.get("state").asText());
+                information.setCity(node.get("city").asText());
                 informationRepository.save(information);
             }
         }catch (Exception e){
@@ -44,15 +44,17 @@ public class InformationService {
         }
         return "Success Bulk Upload";
     }
-    public JsonNode getInformationbyReportId(Long reportId, ObjectNode response){
+    public JsonNode getInformationbyReportId(JsonNode request, ObjectNode response){
+        Long reportId = request.get(Constants.reportId).asLong();
         reportService.getSheetDataUsingReportId(reportId,response);
         if(response.get(Constants.Status_CODE).asInt()!=200){
             return response;
         }
         String fileLocation = response.get(Constants.storageLocation).asText();
-        String reportName = response.get(Constants.infoTitle).toString();
+        String reportName = response.get(Constants.infoTitle).asText();
         List<Information> getInfoFromTitle = informationRepository.getInfoFromTitle(reportName);
-        generateCsvUtils.createMainReportToCsv(getInfoFromTitle,fileLocation);
+        String emailId = request.get("emailId")!=null?request.get("emailId").asText():null;
+        if(emailId!=null)generateCsvUtils.createMainReportToCsv(getInfoFromTitle,fileLocation,emailId);
         response.put(Constants.Status_CODE , Constants.ok);
         response.put("data",getInfoFromTitle.toString());
         return response;
